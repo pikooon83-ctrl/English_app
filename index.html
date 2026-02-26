@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1分スピーチ練習タイマー（録音・4コマつき）</title>
+  <title>1分スピーチ練習タイマー（録音・4コマ・読み上げつき）</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -127,6 +127,15 @@
       font-size: 14px;
     }
 
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d8deea;
+      background: #fff;
+      font-size: 14px;
+    }
+
     @media (min-width: 680px) {
       .grid {
         grid-template-columns: repeat(3, minmax(0,1fr));
@@ -138,8 +147,8 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>⏱ 1分スピーチ練習タイマー（録音・4コマつき）</h1>
-      <div class="sub">4コマを見て話す → 録音 → 英文を確認、の練習用</div>
+      <h1>⏱ 1分スピーチ練習タイマー（録音・4コマ・読み上げつき）</h1>
+      <div class="sub">4コマを見て話す → 録音 → 英文確認 → お手本読み上げで復習</div>
 
       <div id="timeDisplay" class="time">01:00</div>
       <div id="status" class="status">準備OK</div>
@@ -154,7 +163,7 @@
       </div>
 
       <p class="small" style="margin-top:10px;">
-        使い方：4コマを見る → 英文を隠す → 開始 → 1分話す → 録音を聞く → 英文で答え合わせ
+        使い方：4コマを見る → 英文を隠す → 開始 → 1分話す → 録音を聞く → 英文で答え合わせ → お手本を聞く
       </p>
     </div>
 
@@ -187,6 +196,23 @@
         <button id="prevBtn" class="muted">← 前の文</button>
         <button id="nextBtn" class="muted">次の文 →</button>
       </div>
+
+      <div class="grid" style="margin-top:10px;">
+        <button id="speakCurrentBtn" class="muted">🔊 この文を読む</button>
+        <button id="speakAllBtn" class="muted">▶ 8文を順番に読む</button>
+        <button id="stopSpeakBtn" class="muted">⏹ 読み上げ停止</button>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label for="ttsRate" class="small" style="display:block; margin-bottom:6px;">読み上げ速度</label>
+        <select id="ttsRate">
+          <option value="0.8">ゆっくり (0.8x)</option>
+          <option value="1" selected>ふつう (1.0x)</option>
+          <option value="1.15">少し速め (1.15x)</option>
+        </select>
+      </div>
+
+      <div id="ttsStatus" class="small" style="margin-top:8px;">読み上げ準備OK</div>
     </div>
 
     <div class="card">
@@ -268,6 +294,12 @@
       var isComicHidden = false;
       var isTextHidden = false;
 
+      // ===== TTS状態 =====
+      var ttsVoices = [];
+      var ttsVoice = null;
+      var isSpeakingAll = false;
+      var speakAllIndex = 0;
+
       // ===== 要素取得 =====
       var timeDisplay = document.getElementById('timeDisplay');
       var statusEl = document.getElementById('status');
@@ -294,6 +326,12 @@
       var comicHiddenPlaceholder = document.getElementById('comicHiddenPlaceholder');
       var toggleComicBtn = document.getElementById('toggleComicBtn');
       var toggleTextBtn = document.getElementById('toggleTextBtn');
+
+      var speakCurrentBtn = document.getElementById('speakCurrentBtn');
+      var speakAllBtn = document.getElementById('speakAllBtn');
+      var stopSpeakBtn = document.getElementById('stopSpeakBtn');
+      var ttsRateSelect = document.getElementById('ttsRate');
+      var ttsStatus = document.getElementById('ttsStatus');
 
       // ===== 表示更新 =====
       function formatTime(sec) {
@@ -326,6 +364,10 @@
 
       function setRecordStatus(text) {
         recordStatus.textContent = text;
+      }
+
+      function setTtsStatus(text) {
+        if (ttsStatus) ttsStatus.textContent = text;
       }
 
       function stopTimer() {
@@ -603,6 +645,132 @@
         }
       }
 
+      // ===== 読み上げ（TTS）機能 =====
+      function hasTTS() {
+        return !!(window.speechSynthesis && window.SpeechSynthesisUtterance);
+      }
+
+      function loadVoices() {
+        if (!hasTTS()) {
+          setTtsStatus('このブラウザは読み上げに対応していない可能性があります');
+          return;
+        }
+
+        ttsVoices = window.speechSynthesis.getVoices() || [];
+
+        ttsVoice =
+          ttsVoices.find(function (v) { return /^en[-_]/i.test(v.lang) && /Google|Siri|Karen|Daniel|Samantha/i.test(v.name); }) ||
+          ttsVoices.find(function (v) { return /^en[-_]/i.test(v.lang); }) ||
+          null;
+
+        if (ttsVoice) {
+          setTtsStatus('読み上げ準備OK（' + ttsVoice.name + ' / ' + ttsVoice.lang + '）');
+        } else if (ttsVoices.length > 0) {
+          setTtsStatus('英語音声が見つからないため、端末の既定音声を使います');
+        } else {
+          setTtsStatus('音声一覧を読み込み中…（少し待ってから押してみてね）');
+        }
+      }
+
+      function stopSpeaking() {
+        if (!hasTTS()) return;
+        isSpeakingAll = false;
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {
+          console.log(e);
+        }
+        setTtsStatus('読み上げ停止');
+      }
+
+      function speakText(text, onEnd) {
+        if (!hasTTS()) {
+          setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
+          return;
+        }
+
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {
+          console.log(e);
+        }
+
+        var utt = new SpeechSynthesisUtterance(text);
+        var rate = parseFloat(ttsRateSelect.value || '1');
+
+        utt.rate = rate;
+        utt.pitch = 1.0;
+        utt.volume = 1.0;
+
+        if (ttsVoice) {
+          utt.voice = ttsVoice;
+          utt.lang = ttsVoice.lang || 'en-US';
+        } else {
+          utt.lang = 'en-US';
+        }
+
+        utt.onstart = function () {
+          setTtsStatus('読み上げ中…');
+        };
+
+        utt.onend = function () {
+          if (typeof onEnd === 'function') onEnd();
+          else setTtsStatus('読み上げ完了');
+        };
+
+        utt.onerror = function (e) {
+          console.log('TTS error', e);
+          setTtsStatus('読み上げエラー（もう一度試してみてね）');
+          isSpeakingAll = false;
+        };
+
+        window.speechSynthesis.speak(utt);
+      }
+
+      function speakCurrentSentence() {
+        isSpeakingAll = false;
+        speakText(items[currentIndex].en);
+      }
+
+      function speakAllSentences() {
+        if (!hasTTS()) {
+          setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
+          return;
+        }
+
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {
+          console.log(e);
+        }
+
+        isSpeakingAll = true;
+        speakAllIndex = 0;
+
+        function nextSpeak() {
+          if (!isSpeakingAll) return;
+
+          if (speakAllIndex >= items.length) {
+            isSpeakingAll = false;
+            setTtsStatus('8文の読み上げ完了');
+            return;
+          }
+
+          currentIndex = speakAllIndex;
+          renderSentence();
+
+          var text = items[speakAllIndex].en;
+          speakAllIndex += 1;
+
+          speakText(text, function () {
+            if (!isSpeakingAll) return;
+            setTimeout(nextSpeak, 350);
+          });
+        }
+
+        nextSpeak();
+      }
+
       // ===== イベント =====
       startBtn.addEventListener('click', startTimer);
       pauseBtn.addEventListener('click', pauseTimer);
@@ -621,6 +789,10 @@
       });
       recordStopBtn.addEventListener('click', stopRecording);
 
+      speakCurrentBtn.addEventListener('click', speakCurrentSentence);
+      speakAllBtn.addEventListener('click', speakAllSentences);
+      stopSpeakBtn.addEventListener('click', stopSpeaking);
+
       // ===== 初期化 =====
       renderTime();
       renderSentence();
@@ -630,6 +802,18 @@
         setRecordStatus('このブラウザでは録音機能が使えない可能性があります');
       } else {
         setRecordStatus('録音準備OK（⏺ 録音開始を押してください）');
+      }
+
+      if (hasTTS()) {
+        loadVoices();
+
+        if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
+          window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        setTimeout(loadVoices, 500);
+      } else {
+        setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
       }
 
       // 画像読み込み失敗時の補助表示
