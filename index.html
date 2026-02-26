@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1分スピーチ練習タイマー（録音つき）</title>
+  <title>1分スピーチ練習タイマー（録音・4コマつき）</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -102,6 +102,31 @@
       margin-top: 8px;
     }
 
+    .comic-box {
+      margin-top: 10px;
+    }
+    .comic-image {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      background: #f2f4f8;
+      border: 1px solid #eef1f6;
+    }
+    .hidden-placeholder {
+      display: none;
+      width: 100%;
+      min-height: 180px;
+      border-radius: 12px;
+      background: #f3f5fa;
+      border: 1px dashed #cfd6e4;
+      color: #667085;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      font-size: 14px;
+    }
+
     @media (min-width: 680px) {
       .grid {
         grid-template-columns: repeat(3, minmax(0,1fr));
@@ -113,8 +138,8 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>⏱ 1分スピーチ練習タイマー（録音つき）</h1>
-      <div class="sub">まずはタイマー＋録音だけのシンプル版</div>
+      <h1>⏱ 1分スピーチ練習タイマー（録音・4コマつき）</h1>
+      <div class="sub">4コマを見て話す → 録音 → 英文を確認、の練習用</div>
 
       <div id="timeDisplay" class="time">01:00</div>
       <div id="status" class="status">準備OK</div>
@@ -129,8 +154,28 @@
       </div>
 
       <p class="small" style="margin-top:10px;">
-        使い方：開始 → 1分話す → 0秒で終了音（端末設定による）
+        使い方：4コマを見る → 英文を隠す → 開始 → 1分話す → 録音を聞く → 英文で答え合わせ
       </p>
+    </div>
+
+    <div class="card">
+      <h1 style="font-size:20px; margin-bottom:6px;">🖼 4コマ（イメージ練習）</h1>
+      <div class="small">先に絵だけ見て英語で説明してみよう</div>
+
+      <div class="comic-box">
+        <img id="comicImage"
+             class="comic-image"
+             src="17FF0FF3-0AB0-4EA4-AA71-400C57DF1D15.png"
+             alt="朝のバタバタ 4コマ">
+        <div id="comicHiddenPlaceholder" class="hidden-placeholder">
+          4コマは非表示です<br>「👀 4コマを表示」を押してね
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:10px;">
+        <button id="toggleComicBtn" class="muted">🙈 4コマを隠す</button>
+        <button id="toggleTextBtn" class="muted">📝 英文/和訳を隠す</button>
+      </div>
     </div>
 
     <div class="card">
@@ -170,39 +215,39 @@
     (function () {
       'use strict';
 
-      // ===== 練習文（元の8文）=====
+      // ===== 練習文（朝のバタバタ版 8文）=====
       var items = [
         {
-          en: "I have to listen to my kids' various demands every morning.",
-          ja: "私は毎朝、子どもたちのいろいろな要求を聞かないといけません。"
+          en: "Every morning, my kids ask for many different things at the same time.",
+          ja: "毎朝、子どもたちは同時にいろいろなことを求めてきます。"
         },
         {
-          en: "My son gets angry immediately when I don't turn on the TV.",
-          ja: "息子は私がテレビをつけないと、すぐ怒ります。"
+          en: "My son gets upset quickly if I don't turn on the TV right away.",
+          ja: "息子は、私がすぐにテレビをつけないと、すぐ不機嫌になります。"
         },
         {
-          en: "I want to stay calm, but I sometimes lose patience.",
-          ja: "落ち着いていたいのですが、時々我慢できなくなります。"
+          en: "He is very motivated to do his first-grade drill worksheets.",
+          ja: "彼は小1のドリルをやる意欲がとても高いです。"
         },
         {
-          en: "I am practicing speaking English little by little every day.",
-          ja: "私は毎日少しずつ英語を話す練習をしています。"
+          en: "He often wants to keep working on them for a long time.",
+          ja: "彼はよく、長い時間ずっとそれをやりたがります。"
         },
         {
-          en: "I want to make a one-minute speech smoothly.",
-          ja: "私は1分間のスピーチをスムーズに話せるようになりたいです。"
+          en: "I am happy to see his motivation and concentration.",
+          ja: "私は、彼のやる気と集中力を見るとうれしくなります。"
         },
         {
-          en: "Even if I make mistakes, I want to keep speaking.",
-          ja: "間違えても、話し続けたいです。"
+          en: "At the same time, I worry that he may not get enough sleep.",
+          ja: "同時に、睡眠が足りなくなるのではないかと心配になります。"
         },
         {
-          en: "I can improve if I practice step by step.",
-          ja: "少しずつ練習すれば、私は上達できます。"
+          en: "Sometimes he wants to do drills late at night, too.",
+          ja: "夜遅くにもドリルをやりたがることがあります。"
         },
         {
-          en: "Today, I will do my best and finish in one minute.",
-          ja: "今日はベストを尽くして、1分で話し切ります。"
+          en: "So I try to stop him gently and help him get ready for bed.",
+          ja: "だから私はやさしく止めて、寝る準備ができるように手伝います。"
         }
       ];
 
@@ -218,6 +263,10 @@
       var mediaStream = null;
       var recordedChunks = [];
       var currentAudioUrl = null;
+
+      // ===== 表示状態 =====
+      var isComicHidden = false;
+      var isTextHidden = false;
 
       // ===== 要素取得 =====
       var timeDisplay = document.getElementById('timeDisplay');
@@ -241,6 +290,11 @@
       var player = document.getElementById('player');
       var downloadLink = document.getElementById('downloadLink');
 
+      var comicImage = document.getElementById('comicImage');
+      var comicHiddenPlaceholder = document.getElementById('comicHiddenPlaceholder');
+      var toggleComicBtn = document.getElementById('toggleComicBtn');
+      var toggleTextBtn = document.getElementById('toggleTextBtn');
+
       // ===== 表示更新 =====
       function formatTime(sec) {
         var s = Math.max(0, sec);
@@ -255,6 +309,13 @@
 
       function renderSentence() {
         indexLabel.textContent = '文 ' + (currentIndex + 1) + ' / ' + items.length;
+
+        if (isTextHidden) {
+          sentenceEl.textContent = '（英文は非表示）';
+          translationEl.textContent = '（和訳は非表示）';
+          return;
+        }
+
         sentenceEl.textContent = items[currentIndex].en;
         translationEl.textContent = items[currentIndex].ja;
       }
@@ -378,6 +439,33 @@
         setStatus('文をシャッフルしました');
       }
 
+      function toggleComic() {
+        isComicHidden = !isComicHidden;
+
+        if (isComicHidden) {
+          comicImage.style.display = 'none';
+          comicHiddenPlaceholder.style.display = 'flex';
+          toggleComicBtn.textContent = '👀 4コマを表示';
+        } else {
+          comicImage.style.display = 'block';
+          comicHiddenPlaceholder.style.display = 'none';
+          toggleComicBtn.textContent = '🙈 4コマを隠す';
+        }
+      }
+
+      function toggleText() {
+        isTextHidden = !isTextHidden;
+
+        if (isTextHidden) {
+          sentenceEl.textContent = '（英文は非表示）';
+          translationEl.textContent = '（和訳は非表示）';
+          toggleTextBtn.textContent = '📖 英文/和訳を表示';
+        } else {
+          renderSentence();
+          toggleTextBtn.textContent = '📝 英文/和訳を隠す';
+        }
+      }
+
       // ===== 録音機能 =====
       function supportsRecording() {
         return !!(navigator.mediaDevices &&
@@ -390,7 +478,7 @@
           'audio/webm;codecs=opus',
           'audio/webm',
           'audio/mp4',
-          'video/mp4' // iOS系の相性回避用（音声のみでもコンテナとして）
+          'video/mp4'
         ];
         if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
           return '';
@@ -410,14 +498,12 @@
           return;
         }
 
-        // すでに録音中なら何もしない
         if (mediaRecorder && mediaRecorder.state === 'recording') return;
 
         try {
           setRecordStatus('マイク許可を確認中…');
 
           mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
           recordedChunks = [];
 
           var options = {};
@@ -459,7 +545,6 @@
               setRecordStatus('録音データの処理でエラーが出ました');
             }
 
-            // マイク解放
             if (mediaStream) {
               mediaStream.getTracks().forEach(function (t) { t.stop(); });
               mediaStream = null;
@@ -528,6 +613,9 @@
       prevBtn.addEventListener('click', goPrev);
       nextBtn.addEventListener('click', goNext);
 
+      toggleComicBtn.addEventListener('click', toggleComic);
+      toggleTextBtn.addEventListener('click', toggleText);
+
       recordStartBtn.addEventListener('click', function () {
         startRecording();
       });
@@ -543,6 +631,15 @@
       } else {
         setRecordStatus('録音準備OK（⏺ 録音開始を押してください）');
       }
+
+      // 画像読み込み失敗時の補助表示
+      comicImage.addEventListener('error', function () {
+        comicImage.style.display = 'none';
+        comicHiddenPlaceholder.style.display = 'flex';
+        comicHiddenPlaceholder.innerHTML = '4コマ画像が見つかりません。<br>画像ファイル名（src）を確認してね。';
+        toggleComicBtn.textContent = '👀 4コマを表示';
+        isComicHidden = true;
+      });
     })();
   </script>
 </body>
