@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1分スピーチ練習タイマー</title>
+  <title>1分スピーチ練習タイマー（録音つき）</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -65,12 +65,20 @@
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
     button:active {
       transform: scale(0.99);
     }
     .primary { background: #1f6feb; color: #fff; }
     .danger  { background: #e5484d; color: #fff; }
     .muted   { background: #eef1f6; color: #444; }
+    .record  { background: #d92d20; color: #fff; }
+    .recording {
+      box-shadow: 0 0 0 4px rgba(217,45,32,0.18) inset;
+    }
 
     .sentence {
       font-size: 20px;
@@ -86,6 +94,13 @@
       font-size: 13px;
       color: #666;
     }
+    .audio-wrap {
+      margin-top: 10px;
+    }
+    audio {
+      width: 100%;
+      margin-top: 8px;
+    }
 
     @media (min-width: 680px) {
       .grid {
@@ -98,8 +113,8 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>⏱ 1分スピーチ練習タイマー</h1>
-      <div class="sub">まずは動作優先のシンプル版（GitHub Pages向け）</div>
+      <h1>⏱ 1分スピーチ練習タイマー（録音つき）</h1>
+      <div class="sub">まずはタイマー＋録音だけのシンプル版</div>
 
       <div id="timeDisplay" class="time">01:00</div>
       <div id="status" class="status">準備OK</div>
@@ -127,6 +142,27 @@
         <button id="prevBtn" class="muted">← 前の文</button>
         <button id="nextBtn" class="muted">次の文 →</button>
       </div>
+    </div>
+
+    <div class="card">
+      <h1 style="font-size:20px; margin-bottom:6px;">🎙 録音</h1>
+      <div id="recordStatus" class="small">録音準備OK（マイク許可が必要です）</div>
+
+      <div class="grid" style="margin-top:10px;">
+        <button id="recordStartBtn" class="record">⏺ 録音開始</button>
+        <button id="recordStopBtn" class="muted" disabled>■ 録音停止</button>
+      </div>
+
+      <div class="audio-wrap">
+        <audio id="player" controls></audio>
+        <div style="margin-top:8px;">
+          <a id="downloadLink" href="#" download="speech-practice.webm" style="display:none;">⬇ 録音を保存</a>
+        </div>
+      </div>
+
+      <p class="small" style="margin-top:10px;">
+        録音できない場合は、Safari/Chromeのマイク許可設定を確認してね。
+      </p>
     </div>
   </div>
 
@@ -170,12 +206,18 @@
         }
       ];
 
-      // ===== 状態 =====
+      // ===== タイマー状態 =====
       var currentIndex = 0;
       var totalSeconds = 60;
       var remainingSeconds = 60;
       var timerId = null;
       var isRunning = false;
+
+      // ===== 録音状態 =====
+      var mediaRecorder = null;
+      var mediaStream = null;
+      var recordedChunks = [];
+      var currentAudioUrl = null;
 
       // ===== 要素取得 =====
       var timeDisplay = document.getElementById('timeDisplay');
@@ -192,6 +234,12 @@
       var shuffleBtn = document.getElementById('shuffleBtn');
       var prevBtn = document.getElementById('prevBtn');
       var nextBtn = document.getElementById('nextBtn');
+
+      var recordStatus = document.getElementById('recordStatus');
+      var recordStartBtn = document.getElementById('recordStartBtn');
+      var recordStopBtn = document.getElementById('recordStopBtn');
+      var player = document.getElementById('player');
+      var downloadLink = document.getElementById('downloadLink');
 
       // ===== 表示更新 =====
       function formatTime(sec) {
@@ -215,6 +263,10 @@
         statusEl.textContent = text;
       }
 
+      function setRecordStatus(text) {
+        recordStatus.textContent = text;
+      }
+
       function stopTimer() {
         if (timerId !== null) {
           clearInterval(timerId);
@@ -224,7 +276,6 @@
       }
 
       function beep() {
-        // 簡易ビープ（ブラウザ対応状況により鳴らない場合あり）
         try {
           var AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (!AudioCtx) return;
@@ -245,7 +296,6 @@
             if (ctx.close) ctx.close();
           }, 180);
         } catch (e) {
-          // 音が出なくてもタイマー本体は動かす
           console.log('beep failed', e);
         }
       }
@@ -297,7 +347,6 @@
 
         totalSeconds = next;
 
-        // 実行中でなければ残り秒数も合わせる
         if (!isRunning) {
           remainingSeconds = totalSeconds;
           renderTime();
@@ -318,7 +367,6 @@
       }
 
       function shuffleItems() {
-        // Fisher-Yates
         for (var i = items.length - 1; i > 0; i--) {
           var j = Math.floor(Math.random() * (i + 1));
           var temp = items[i];
@@ -328,6 +376,146 @@
         currentIndex = 0;
         renderSentence();
         setStatus('文をシャッフルしました');
+      }
+
+      // ===== 録音機能 =====
+      function supportsRecording() {
+        return !!(navigator.mediaDevices &&
+                  navigator.mediaDevices.getUserMedia &&
+                  window.MediaRecorder);
+      }
+
+      function pickMimeType() {
+        var candidates = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/mp4',
+          'video/mp4' // iOS系の相性回避用（音声のみでもコンテナとして）
+        ];
+        if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
+          return '';
+        }
+        for (var i = 0; i < candidates.length; i++) {
+          if (MediaRecorder.isTypeSupported(candidates[i])) {
+            return candidates[i];
+          }
+        }
+        return '';
+      }
+
+      async function startRecording() {
+        if (!supportsRecording()) {
+          setRecordStatus('このブラウザは録音に対応していない可能性があります');
+          alert('このブラウザでは録音機能が使えない可能性があります。Safari/Chrome最新版で試してみてください。');
+          return;
+        }
+
+        // すでに録音中なら何もしない
+        if (mediaRecorder && mediaRecorder.state === 'recording') return;
+
+        try {
+          setRecordStatus('マイク許可を確認中…');
+
+          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+          recordedChunks = [];
+
+          var options = {};
+          var mimeType = pickMimeType();
+          if (mimeType) {
+            options.mimeType = mimeType;
+          }
+
+          mediaRecorder = new MediaRecorder(mediaStream, options);
+
+          mediaRecorder.ondataavailable = function (e) {
+            if (e.data && e.data.size > 0) {
+              recordedChunks.push(e.data);
+            }
+          };
+
+          mediaRecorder.onstop = function () {
+            try {
+              if (currentAudioUrl) {
+                URL.revokeObjectURL(currentAudioUrl);
+                currentAudioUrl = null;
+              }
+
+              var blobType = (mediaRecorder && mediaRecorder.mimeType) ? mediaRecorder.mimeType : 'audio/webm';
+              var blob = new Blob(recordedChunks, { type: blobType });
+
+              currentAudioUrl = URL.createObjectURL(blob);
+              player.src = currentAudioUrl;
+
+              var ext = 'webm';
+              if (blobType.indexOf('mp4') !== -1) ext = 'mp4';
+              downloadLink.href = currentAudioUrl;
+              downloadLink.download = 'speech-practice.' + ext;
+              downloadLink.style.display = 'inline';
+
+              setRecordStatus('録音停止。再生/保存できます');
+            } catch (err) {
+              console.log(err);
+              setRecordStatus('録音データの処理でエラーが出ました');
+            }
+
+            // マイク解放
+            if (mediaStream) {
+              mediaStream.getTracks().forEach(function (t) { t.stop(); });
+              mediaStream = null;
+            }
+
+            recordStartBtn.disabled = false;
+            recordStopBtn.disabled = true;
+            recordStartBtn.classList.remove('recording');
+          };
+
+          mediaRecorder.onerror = function (e) {
+            console.log('MediaRecorder error', e);
+            setRecordStatus('録音エラーが発生しました');
+            recordStartBtn.disabled = false;
+            recordStopBtn.disabled = true;
+            recordStartBtn.classList.remove('recording');
+          };
+
+          mediaRecorder.start();
+          setRecordStatus('録音中… 話してください');
+          recordStartBtn.disabled = true;
+          recordStopBtn.disabled = false;
+          recordStartBtn.classList.add('recording');
+        } catch (err) {
+          console.log(err);
+          if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+            setRecordStatus('マイク許可が必要です（許可してください）');
+            alert('マイクの使用が許可されていません。ブラウザの設定でマイクを許可してください。');
+          } else if (err && err.name === 'NotFoundError') {
+            setRecordStatus('マイクが見つかりません');
+            alert('マイクが見つかりませんでした。端末設定を確認してください。');
+          } else {
+            setRecordStatus('録音を開始できませんでした');
+            alert('録音の開始に失敗しました。Safari/Chromeで開いているか確認してください。');
+          }
+
+          if (mediaStream) {
+            mediaStream.getTracks().forEach(function (t) { t.stop(); });
+            mediaStream = null;
+          }
+          recordStartBtn.disabled = false;
+          recordStopBtn.disabled = true;
+          recordStartBtn.classList.remove('recording');
+        }
+      }
+
+      function stopRecording() {
+        try {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            setRecordStatus('録音停止中…');
+          }
+        } catch (e) {
+          console.log(e);
+          setRecordStatus('録音停止時にエラーが出ました');
+        }
       }
 
       // ===== イベント =====
@@ -340,10 +528,21 @@
       prevBtn.addEventListener('click', goPrev);
       nextBtn.addEventListener('click', goNext);
 
+      recordStartBtn.addEventListener('click', function () {
+        startRecording();
+      });
+      recordStopBtn.addEventListener('click', stopRecording);
+
       // ===== 初期化 =====
       renderTime();
       renderSentence();
       setStatus('準備OK');
+
+      if (!supportsRecording()) {
+        setRecordStatus('このブラウザでは録音機能が使えない可能性があります');
+      } else {
+        setRecordStatus('録音準備OK（⏺ 録音開始を押してください）');
+      }
     })();
   </script>
 </body>
