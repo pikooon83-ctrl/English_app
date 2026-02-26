@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>1分スピーチ練習タイマー（録音・4コマ・読み上げつき）</title>
+  <title>英語スピーチ練習アプリ一覧</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -14,226 +14,202 @@
       line-height: 1.5;
     }
     .wrap {
-      max-width: 760px;
+      max-width: 860px;
       margin: 0 auto;
       padding: 16px;
     }
-    .card {
+    .hero {
       background: #fff;
-      border-radius: 16px;
-      padding: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
       margin-bottom: 16px;
     }
     h1 {
-      font-size: 22px;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
+      font-size: 24px;
     }
     .sub {
-      color: #666;
+      color: #667085;
       font-size: 14px;
-      margin-bottom: 12px;
+      margin: 0;
     }
-    .time {
-      font-size: 56px;
-      font-weight: 700;
-      text-align: center;
-      letter-spacing: 1px;
-      margin: 8px 0 12px;
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 12px 0 0;
     }
-    .status {
-      text-align: center;
+    .toolbar input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #d8deea;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    .section {
+      margin-top: 16px;
+    }
+    .section-title {
       font-size: 14px;
-      color: #555;
-      min-height: 1.4em;
-      margin-bottom: 12px;
+      color: #667085;
+      margin: 0 0 8px;
+      padding-left: 2px;
     }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 10px;
-    }
-    button {
-      width: 100%;
-      padding: 14px 12px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      background: #e9edf5;
-      color: #222;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-    button:active {
-      transform: scale(0.99);
-    }
-    .primary { background: #1f6feb; color: #fff; }
-    .danger  { background: #e5484d; color: #fff; }
-    .muted   { background: #eef1f6; color: #444; }
-    .record  { background: #d92d20; color: #fff; }
-    .recording {
-      box-shadow: 0 0 0 4px rgba(217,45,32,0.18) inset;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
-    .sentence {
-      font-size: 20px;
-      font-weight: 600;
-      margin: 8px 0 6px;
-    }
-    .translation {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    .small {
-      font-size: 13px;
-      color: #666;
-    }
-    .audio-wrap {
-      margin-top: 10px;
-    }
-    audio {
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    .comic-box {
-      margin-top: 10px;
-    }
-    .comic-image {
-      width: 100%;
-      display: block;
-      border-radius: 12px;
-      background: #f2f4f8;
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.05);
       border: 1px solid #eef1f6;
     }
-    .hidden-placeholder {
-      display: none;
-      width: 100%;
-      min-height: 180px;
-      border-radius: 12px;
-      background: #f3f5fa;
-      border: 1px dashed #cfd6e4;
+
+    .row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .id-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #1f6feb;
+      background: #eaf2ff;
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .meta {
+      margin-top: 6px;
       color: #667085;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 16px;
+      font-size: 13px;
+    }
+
+    .desc {
+      margin-top: 8px;
+      color: #444;
       font-size: 14px;
     }
 
-    select {
-      width: 100%;
-      padding: 10px;
+    .tags {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      color: #475467;
+      background: #f2f4f7;
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      border: none;
       border-radius: 10px;
-      border: 1px solid #d8deea;
-      background: #fff;
+      padding: 10px 12px;
       font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
-    @media (min-width: 680px) {
+    .btn-primary {
+      background: #1f6feb;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #eef1f6;
+      color: #344054;
+    }
+
+    .placeholder {
+      border: 2px dashed #d8deea;
+      background: #fbfcfe;
+    }
+
+    .placeholder .title {
+      color: #667085;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      color: #667085;
+      font-size: 13px;
+      text-align: center;
+      padding-bottom: 10px;
+    }
+
+    @media (min-width: 700px) {
       .grid {
-        grid-template-columns: repeat(3, minmax(0,1fr));
+        grid-template-columns: 1fr 1fr;
       }
-      .time { font-size: 68px; }
+      .toolbar {
+        grid-template-columns: 1fr auto auto;
+      }
+      .toolbar button {
+        white-space: nowrap;
+      }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>⏱ 1分スピーチ練習タイマー（録音・4コマ・読み上げつき）</h1>
-      <div class="sub">4コマを見て話す → 録音 → 英文確認 → お手本読み上げで復習</div>
-
-      <div id="timeDisplay" class="time">01:00</div>
-      <div id="status" class="status">準備OK</div>
-
-      <div class="grid">
-        <button id="startBtn" class="primary">▶ 開始</button>
-        <button id="pauseBtn" class="muted">⏸ 一時停止</button>
-        <button id="resetBtn" class="danger">↺ リセット</button>
-        <button id="minusBtn" class="muted">−10秒</button>
-        <button id="plusBtn" class="muted">＋10秒</button>
-        <button id="shuffleBtn" class="muted">🔀 文をシャッフル</button>
-      </div>
-
-      <p class="small" style="margin-top:10px;">
-        使い方：4コマを見る → 英文を隠す → 開始 → 1分話す → 録音を聞く → 英文で答え合わせ → お手本を聞く
+    <div class="hero">
+      <h1>📚 英語スピーチ練習アプリ一覧</h1>
+      <p class="sub">
+        4コマ＋1分タイマー＋録音＋読み上げつきの練習アプリをここから開く
       </p>
-    </div>
 
-    <div class="card">
-      <h1 style="font-size:20px; margin-bottom:6px;">🖼 4コマ（イメージ練習）</h1>
-      <div class="small">先に絵だけ見て英語で説明してみよう</div>
-
-      <div class="comic-box">
-        <img id="comicImage"
-             class="comic-image"
-             src="001.PNG"
-             alt="朝のバタバタ 4コマ">
-        <div id="comicHiddenPlaceholder" class="hidden-placeholder">
-          4コマは非表示です<br>「👀 4コマを表示」を押してね
-        </div>
-      </div>
-
-      <div class="grid" style="margin-top:10px;">
-        <button id="toggleComicBtn" class="muted">🙈 4コマを隠す</button>
-        <button id="toggleTextBtn" class="muted">📝 英文/和訳を隠す</button>
+      <div class="toolbar">
+        <input id="searchInput" type="text" placeholder="タイトルやタグで検索（例：朝 / drill / bedtime）">
+        <button id="showAllBtn" class="btn btn-secondary" type="button">全件表示</button>
+        <button id="showTodoBtn" class="btn btn-secondary" type="button">未作成だけ</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="small" id="indexLabel">文 1 / 8</div>
-      <div id="sentence" class="sentence"></div>
-      <div id="translation" class="translation"></div>
+    <div class="section">
+      <p class="section-title">アプリ一覧（通し番号つき）</p>
 
-      <div class="grid" style="margin-top:8px;">
-        <button id="prevBtn" class="muted">← 前の文</button>
-        <button id="nextBtn" class="muted">次の文 →</button>
+      <div id="appGrid" class="grid">
+        <!-- JSで描画 -->
       </div>
-
-      <div class="grid" style="margin-top:10px;">
-        <button id="speakCurrentBtn" class="muted">🔊 この文を読む</button>
-        <button id="speakAllBtn" class="muted">▶ 8文を順番に読む</button>
-        <button id="stopSpeakBtn" class="muted">⏹ 読み上げ停止</button>
-      </div>
-
-      <div style="margin-top:10px;">
-        <label for="ttsRate" class="small" style="display:block; margin-bottom:6px;">読み上げ速度</label>
-        <select id="ttsRate">
-          <option value="0.8">ゆっくり (0.8x)</option>
-          <option value="1" selected>ふつう (1.0x)</option>
-          <option value="1.15">少し速め (1.15x)</option>
-        </select>
-      </div>
-
-      <div id="ttsStatus" class="small" style="margin-top:8px;">読み上げ準備OK</div>
     </div>
 
-    <div class="card">
-      <h1 style="font-size:20px; margin-bottom:6px;">🎙 録音</h1>
-      <div id="recordStatus" class="small">録音準備OK（マイク許可が必要です）</div>
-
-      <div class="grid" style="margin-top:10px;">
-        <button id="recordStartBtn" class="record">⏺ 録音開始</button>
-        <button id="recordStopBtn" class="muted" disabled>■ 録音停止</button>
-      </div>
-
-      <div class="audio-wrap">
-        <audio id="player" controls></audio>
-        <div style="margin-top:8px;">
-          <a id="downloadLink" href="#" download="speech-practice.webm" style="display:none;">⬇ 録音を保存</a>
-        </div>
-      </div>
-
-      <p class="small" style="margin-top:10px;">
-        録音できない場合は、Safari/Chromeのマイク許可設定を確認してね。
-      </p>
+    <div class="footer-note">
+      💡 ボイスチャットでは「#001の5文目を直したい」みたいに番号で話せるようにする
     </div>
   </div>
 
@@ -241,589 +217,202 @@
     (function () {
       'use strict';
 
-      // ===== 練習文（朝のバタバタ版 8文）=====
-      var items = [
+      // ===== 一覧データ（ここを増やしていく）=====
+      // status: "ready"（作成済み） / "todo"（枠だけ）
+      var apps = [
         {
-          en: "Every morning, my kids ask for many different things at the same time.",
-          ja: "毎朝、子どもたちは同時にいろいろなことを求めてきます。"
+          id: "001",
+          title: "朝のバタバタ",
+          version: "v1",
+          status: "ready",
+          path: "apps/001.html",
+          description: "朝の要求ラッシュ、TV、ドリルへの意欲、睡眠の心配を4コマで話す練習。",
+          tags: ["朝", "育児", "drill", "sleep", "4コマ", "1分スピーチ"],
+          updated: "2026-02-26"
         },
         {
-          en: "My son gets upset quickly if I don't turn on the TV right away.",
-          ja: "息子は、私がすぐにテレビをつけないと、すぐ不機嫌になります。"
+          id: "002",
+          title: "（未作成）",
+          version: "v0",
+          status: "todo",
+          path: "apps/002.html",
+          description: "次のテーマ用の枠。例：登校前／朝ごはん／兄妹げんか など",
+          tags: ["未作成"],
+          updated: "-"
         },
         {
-          en: "He is very motivated to do his first-grade drill worksheets.",
-          ja: "彼は小1のドリルをやる意欲がとても高いです。"
+          id: "003",
+          title: "（未作成）",
+          version: "v0",
+          status: "todo",
+          path: "apps/003.html",
+          description: "次のテーマ用の枠。",
+          tags: ["未作成"],
+          updated: "-"
         },
         {
-          en: "He often wants to keep working on them for a long time.",
-          ja: "彼はよく、長い時間ずっとそれをやりたがります。"
+          id: "004",
+          title: "（未作成）",
+          version: "v0",
+          status: "todo",
+          path: "apps/004.html",
+          description: "次のテーマ用の枠。",
+          tags: ["未作成"],
+          updated: "-"
         },
         {
-          en: "I am happy to see his motivation and concentration.",
-          ja: "私は、彼のやる気と集中力を見るとうれしくなります。"
-        },
-        {
-          en: "At the same time, I worry that he may not get enough sleep.",
-          ja: "同時に、睡眠が足りなくなるのではないかと心配になります。"
-        },
-        {
-          en: "Sometimes he wants to do drills late at night, too.",
-          ja: "夜遅くにもドリルをやりたがることがあります。"
-        },
-        {
-          en: "So I try to stop him gently and help him get ready for bed.",
-          ja: "だから私はやさしく止めて、寝る準備ができるように手伝います。"
+          id: "005",
+          title: "（未作成）",
+          version: "v0",
+          status: "todo",
+          path: "apps/005.html",
+          description: "次のテーマ用の枠。",
+          tags: ["未作成"],
+          updated: "-"
         }
       ];
 
-      // ===== タイマー状態 =====
-      var currentIndex = 0;
-      var totalSeconds = 60;
-      var remainingSeconds = 60;
-      var timerId = null;
-      var isRunning = false;
+      var appGrid = document.getElementById('appGrid');
+      var searchInput = document.getElementById('searchInput');
+      var showAllBtn = document.getElementById('showAllBtn');
+      var showTodoBtn = document.getElementById('showTodoBtn');
 
-      // ===== 録音状態 =====
-      var mediaRecorder = null;
-      var mediaStream = null;
-      var recordedChunks = [];
-      var currentAudioUrl = null;
+      var mode = 'all'; // all | todo
 
-      // ===== 表示状態 =====
-      var isComicHidden = false;
-      var isTextHidden = false;
-
-      // ===== TTS状態 =====
-      var ttsVoices = [];
-      var ttsVoice = null;
-      var isSpeakingAll = false;
-      var speakAllIndex = 0;
-
-      // ===== 要素取得 =====
-      var timeDisplay = document.getElementById('timeDisplay');
-      var statusEl = document.getElementById('status');
-      var indexLabel = document.getElementById('indexLabel');
-      var sentenceEl = document.getElementById('sentence');
-      var translationEl = document.getElementById('translation');
-
-      var startBtn = document.getElementById('startBtn');
-      var pauseBtn = document.getElementById('pauseBtn');
-      var resetBtn = document.getElementById('resetBtn');
-      var minusBtn = document.getElementById('minusBtn');
-      var plusBtn = document.getElementById('plusBtn');
-      var shuffleBtn = document.getElementById('shuffleBtn');
-      var prevBtn = document.getElementById('prevBtn');
-      var nextBtn = document.getElementById('nextBtn');
-
-      var recordStatus = document.getElementById('recordStatus');
-      var recordStartBtn = document.getElementById('recordStartBtn');
-      var recordStopBtn = document.getElementById('recordStopBtn');
-      var player = document.getElementById('player');
-      var downloadLink = document.getElementById('downloadLink');
-
-      var comicImage = document.getElementById('comicImage');
-      var comicHiddenPlaceholder = document.getElementById('comicHiddenPlaceholder');
-      var toggleComicBtn = document.getElementById('toggleComicBtn');
-      var toggleTextBtn = document.getElementById('toggleTextBtn');
-
-      var speakCurrentBtn = document.getElementById('speakCurrentBtn');
-      var speakAllBtn = document.getElementById('speakAllBtn');
-      var stopSpeakBtn = document.getElementById('stopSpeakBtn');
-      var ttsRateSelect = document.getElementById('ttsRate');
-      var ttsStatus = document.getElementById('ttsStatus');
-
-      // ===== 表示更新 =====
-      function formatTime(sec) {
-        var s = Math.max(0, sec);
-        var mm = Math.floor(s / 60);
-        var ss = s % 60;
-        return String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
       }
 
-      function renderTime() {
-        timeDisplay.textContent = formatTime(remainingSeconds);
+      function matchesSearch(app, keyword) {
+        if (!keyword) return true;
+        var q = keyword.toLowerCase();
+
+        var hay = [
+          app.id,
+          app.title,
+          app.version,
+          app.description,
+          (app.tags || []).join(' ')
+        ].join(' ').toLowerCase();
+
+        return hay.indexOf(q) !== -1;
       }
 
-      function renderSentence() {
-        indexLabel.textContent = '文 ' + (currentIndex + 1) + ' / ' + items.length;
+      function render() {
+        var keyword = (searchInput.value || '').trim();
 
-        if (isTextHidden) {
-          sentenceEl.textContent = '（英文は非表示）';
-          translationEl.textContent = '（和訳は非表示）';
+        var filtered = apps.filter(function (app) {
+          if (mode === 'todo' && app.status !== 'todo') return false;
+          return matchesSearch(app, keyword);
+        });
+
+        if (filtered.length === 0) {
+          appGrid.innerHTML =
+            '<div class="card" style="grid-column:1/-1;">' +
+              '<div class="title">該当するアプリがありません</div>' +
+              '<div class="desc">検索語を変えるか、「全件表示」を押してみてね。</div>' +
+            '</div>';
           return;
         }
 
-        sentenceEl.textContent = items[currentIndex].en;
-        translationEl.textContent = items[currentIndex].ja;
+        appGrid.innerHTML = filtered.map(function (app) {
+          var isReady = app.status === 'ready';
+          var cardClass = 'card' + (isReady ? '' : ' placeholder');
+
+          var tagsHtml = (app.tags || []).map(function (tag) {
+            return '<span class="tag">' + escapeHtml(tag) + '</span>';
+          }).join('');
+
+          var mainAction = isReady
+            ? '<a class="btn btn-primary" href="' + escapeHtml(app.path) + '">開く</a>'
+            : '<button class="btn btn-secondary" type="button" disabled>未作成</button>';
+
+          var copyLabel = '#' + app.id + ' ' + app.title;
+          var copyButton = '<button class="btn btn-secondary" type="button" data-copy="' + escapeHtml(copyLabel) + '">番号をコピー</button>';
+
+          return (
+            '<div class="' + cardClass + '">' +
+              '<div class="id-badge">#' + escapeHtml(app.id) + '</div>' +
+              '<div class="row">' +
+                '<div style="flex:1; min-width:0;">' +
+                  '<p class="title">' + escapeHtml(app.title) + '</p>' +
+                  '<div class="meta">Version: ' + escapeHtml(app.version) + ' / Updated: ' + escapeHtml(app.updated) + '</div>' +
+                  '<div class="desc">' + escapeHtml(app.description) + '</div>' +
+                  '<div class="tags">' + tagsHtml + '</div>' +
+                '</div>' +
+              '</div>' +
+              '<div class="actions">' +
+                mainAction +
+                copyButton +
+              '</div>' +
+            '</div>'
+          );
+        }).join('');
+
+        bindCopyButtons();
       }
 
-      function setStatus(text) {
-        statusEl.textContent = text;
-      }
-
-      function setRecordStatus(text) {
-        recordStatus.textContent = text;
-      }
-
-      function setTtsStatus(text) {
-        if (ttsStatus) ttsStatus.textContent = text;
-      }
-
-      function stopTimer() {
-        if (timerId !== null) {
-          clearInterval(timerId);
-          timerId = null;
-        }
-        isRunning = false;
-      }
-
-      function beep() {
-        try {
-          var AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          var ctx = new AudioCtx();
-          var osc = ctx.createOscillator();
-          var gain = ctx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.value = 880;
-          gain.gain.value = 0.05;
-
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc.start();
-          setTimeout(function () {
-            osc.stop();
-            if (ctx.close) ctx.close();
-          }, 180);
-        } catch (e) {
-          console.log('beep failed', e);
-        }
-      }
-
-      function startTimer() {
-        if (isRunning) return;
-        if (remainingSeconds <= 0) {
-          remainingSeconds = totalSeconds;
-          renderTime();
-        }
-
-        isRunning = true;
-        setStatus('計測中… 話してみよう！');
-
-        timerId = setInterval(function () {
-          remainingSeconds -= 1;
-          renderTime();
-
-          if (remainingSeconds <= 0) {
-            remainingSeconds = 0;
-            renderTime();
-            stopTimer();
-            setStatus('時間です！よくできました ✨');
-            beep();
-          }
-        }, 1000);
-      }
-
-      function pauseTimer() {
-        if (!isRunning) {
-          setStatus('一時停止中');
-          return;
-        }
-        stopTimer();
-        setStatus('一時停止中');
-      }
-
-      function resetTimer() {
-        stopTimer();
-        remainingSeconds = totalSeconds;
-        renderTime();
-        setStatus('準備OK');
-      }
-
-      function changeTotal(delta) {
-        var next = totalSeconds + delta;
-        if (next < 10) next = 10;
-        if (next > 600) next = 600;
-
-        totalSeconds = next;
-
-        if (!isRunning) {
-          remainingSeconds = totalSeconds;
-          renderTime();
-          setStatus('時間設定を ' + totalSeconds + ' 秒に変更');
-        } else {
-          setStatus('実行中のため、次回リセット時に ' + totalSeconds + ' 秒');
-        }
-      }
-
-      function goPrev() {
-        currentIndex = (currentIndex - 1 + items.length) % items.length;
-        renderSentence();
-      }
-
-      function goNext() {
-        currentIndex = (currentIndex + 1) % items.length;
-        renderSentence();
-      }
-
-      function shuffleItems() {
-        for (var i = items.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var temp = items[i];
-          items[i] = items[j];
-          items[j] = temp;
-        }
-        currentIndex = 0;
-        renderSentence();
-        setStatus('文をシャッフルしました');
-      }
-
-      function toggleComic() {
-        isComicHidden = !isComicHidden;
-
-        if (isComicHidden) {
-          comicImage.style.display = 'none';
-          comicHiddenPlaceholder.style.display = 'flex';
-          toggleComicBtn.textContent = '👀 4コマを表示';
-        } else {
-          comicImage.style.display = 'block';
-          comicHiddenPlaceholder.style.display = 'none';
-          toggleComicBtn.textContent = '🙈 4コマを隠す';
-        }
-      }
-
-      function toggleText() {
-        isTextHidden = !isTextHidden;
-
-        if (isTextHidden) {
-          sentenceEl.textContent = '（英文は非表示）';
-          translationEl.textContent = '（和訳は非表示）';
-          toggleTextBtn.textContent = '📖 英文/和訳を表示';
-        } else {
-          renderSentence();
-          toggleTextBtn.textContent = '📝 英文/和訳を隠す';
-        }
-      }
-
-      // ===== 録音機能 =====
-      function supportsRecording() {
-        return !!(navigator.mediaDevices &&
-                  navigator.mediaDevices.getUserMedia &&
-                  window.MediaRecorder);
-      }
-
-      function pickMimeType() {
-        var candidates = [
-          'audio/webm;codecs=opus',
-          'audio/webm',
-          'audio/mp4',
-          'video/mp4'
-        ];
-        if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
-          return '';
-        }
-        for (var i = 0; i < candidates.length; i++) {
-          if (MediaRecorder.isTypeSupported(candidates[i])) {
-            return candidates[i];
-          }
-        }
-        return '';
-      }
-
-      async function startRecording() {
-        if (!supportsRecording()) {
-          setRecordStatus('このブラウザは録音に対応していない可能性があります');
-          alert('このブラウザでは録音機能が使えない可能性があります。Safari/Chrome最新版で試してみてください。');
-          return;
-        }
-
-        if (mediaRecorder && mediaRecorder.state === 'recording') return;
-
-        try {
-          setRecordStatus('マイク許可を確認中…');
-
-          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          recordedChunks = [];
-
-          var options = {};
-          var mimeType = pickMimeType();
-          if (mimeType) {
-            options.mimeType = mimeType;
-          }
-
-          mediaRecorder = new MediaRecorder(mediaStream, options);
-
-          mediaRecorder.ondataavailable = function (e) {
-            if (e.data && e.data.size > 0) {
-              recordedChunks.push(e.data);
-            }
-          };
-
-          mediaRecorder.onstop = function () {
-            try {
-              if (currentAudioUrl) {
-                URL.revokeObjectURL(currentAudioUrl);
-                currentAudioUrl = null;
-              }
-
-              var blobType = (mediaRecorder && mediaRecorder.mimeType) ? mediaRecorder.mimeType : 'audio/webm';
-              var blob = new Blob(recordedChunks, { type: blobType });
-
-              currentAudioUrl = URL.createObjectURL(blob);
-              player.src = currentAudioUrl;
-
-              var ext = 'webm';
-              if (blobType.indexOf('mp4') !== -1) ext = 'mp4';
-              downloadLink.href = currentAudioUrl;
-              downloadLink.download = 'speech-practice.' + ext;
-              downloadLink.style.display = 'inline';
-
-              setRecordStatus('録音停止。再生/保存できます');
-            } catch (err) {
-              console.log(err);
-              setRecordStatus('録音データの処理でエラーが出ました');
-            }
-
-            if (mediaStream) {
-              mediaStream.getTracks().forEach(function (t) { t.stop(); });
-              mediaStream = null;
-            }
-
-            recordStartBtn.disabled = false;
-            recordStopBtn.disabled = true;
-            recordStartBtn.classList.remove('recording');
-          };
-
-          mediaRecorder.onerror = function (e) {
-            console.log('MediaRecorder error', e);
-            setRecordStatus('録音エラーが発生しました');
-            recordStartBtn.disabled = false;
-            recordStopBtn.disabled = true;
-            recordStartBtn.classList.remove('recording');
-          };
-
-          mediaRecorder.start();
-          setRecordStatus('録音中… 話してください');
-          recordStartBtn.disabled = true;
-          recordStopBtn.disabled = false;
-          recordStartBtn.classList.add('recording');
-        } catch (err) {
-          console.log(err);
-          if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
-            setRecordStatus('マイク許可が必要です（許可してください）');
-            alert('マイクの使用が許可されていません。ブラウザの設定でマイクを許可してください。');
-          } else if (err && err.name === 'NotFoundError') {
-            setRecordStatus('マイクが見つかりません');
-            alert('マイクが見つかりませんでした。端末設定を確認してください。');
-          } else {
-            setRecordStatus('録音を開始できませんでした');
-            alert('録音の開始に失敗しました。Safari/Chromeで開いているか確認してください。');
-          }
-
-          if (mediaStream) {
-            mediaStream.getTracks().forEach(function (t) { t.stop(); });
-            mediaStream = null;
-          }
-          recordStartBtn.disabled = false;
-          recordStopBtn.disabled = true;
-          recordStartBtn.classList.remove('recording');
-        }
-      }
-
-      function stopRecording() {
-        try {
-          if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            setRecordStatus('録音停止中…');
-          }
-        } catch (e) {
-          console.log(e);
-          setRecordStatus('録音停止時にエラーが出ました');
-        }
-      }
-
-      // ===== 読み上げ（TTS）機能 =====
-      function hasTTS() {
-        return !!(window.speechSynthesis && window.SpeechSynthesisUtterance);
-      }
-
-      function loadVoices() {
-        if (!hasTTS()) {
-          setTtsStatus('このブラウザは読み上げに対応していない可能性があります');
-          return;
-        }
-
-        ttsVoices = window.speechSynthesis.getVoices() || [];
-
-        ttsVoice =
-          ttsVoices.find(function (v) { return /^en[-_]/i.test(v.lang) && /Google|Siri|Karen|Daniel|Samantha/i.test(v.name); }) ||
-          ttsVoices.find(function (v) { return /^en[-_]/i.test(v.lang); }) ||
-          null;
-
-        if (ttsVoice) {
-          setTtsStatus('読み上げ準備OK（' + ttsVoice.name + ' / ' + ttsVoice.lang + '）');
-        } else if (ttsVoices.length > 0) {
-          setTtsStatus('英語音声が見つからないため、端末の既定音声を使います');
-        } else {
-          setTtsStatus('音声一覧を読み込み中…（少し待ってから押してみてね）');
-        }
-      }
-
-      function stopSpeaking() {
-        if (!hasTTS()) return;
-        isSpeakingAll = false;
-        try {
-          window.speechSynthesis.cancel();
-        } catch (e) {
-          console.log(e);
-        }
-        setTtsStatus('読み上げ停止');
-      }
-
-      function speakText(text, onEnd) {
-        if (!hasTTS()) {
-          setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
-          return;
-        }
-
-        try {
-          window.speechSynthesis.cancel();
-        } catch (e) {
-          console.log(e);
-        }
-
-        var utt = new SpeechSynthesisUtterance(text);
-        var rate = parseFloat(ttsRateSelect.value || '1');
-
-        utt.rate = rate;
-        utt.pitch = 1.0;
-        utt.volume = 1.0;
-
-        if (ttsVoice) {
-          utt.voice = ttsVoice;
-          utt.lang = ttsVoice.lang || 'en-US';
-        } else {
-          utt.lang = 'en-US';
-        }
-
-        utt.onstart = function () {
-          setTtsStatus('読み上げ中…');
-        };
-
-        utt.onend = function () {
-          if (typeof onEnd === 'function') onEnd();
-          else setTtsStatus('読み上げ完了');
-        };
-
-        utt.onerror = function (e) {
-          console.log('TTS error', e);
-          setTtsStatus('読み上げエラー（もう一度試してみてね）');
-          isSpeakingAll = false;
-        };
-
-        window.speechSynthesis.speak(utt);
-      }
-
-      function speakCurrentSentence() {
-        isSpeakingAll = false;
-        speakText(items[currentIndex].en);
-      }
-
-      function speakAllSentences() {
-        if (!hasTTS()) {
-          setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
-          return;
-        }
-
-        try {
-          window.speechSynthesis.cancel();
-        } catch (e) {
-          console.log(e);
-        }
-
-        isSpeakingAll = true;
-        speakAllIndex = 0;
-
-        function nextSpeak() {
-          if (!isSpeakingAll) return;
-
-          if (speakAllIndex >= items.length) {
-            isSpeakingAll = false;
-            setTtsStatus('8文の読み上げ完了');
-            return;
-          }
-
-          currentIndex = speakAllIndex;
-          renderSentence();
-
-          var text = items[speakAllIndex].en;
-          speakAllIndex += 1;
-
-          speakText(text, function () {
-            if (!isSpeakingAll) return;
-            setTimeout(nextSpeak, 350);
+      function bindCopyButtons() {
+        var buttons = appGrid.querySelectorAll('[data-copy]');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var text = btn.getAttribute('data-copy') || '';
+            copyText(text).then(function () {
+              var old = btn.textContent;
+              btn.textContent = 'コピー済み';
+              setTimeout(function () {
+                btn.textContent = old;
+              }, 900);
+            }).catch(function () {
+              alert('コピーできなかったので、手でメモしてね：' + text);
+            });
           });
-        }
+        });
+      }
 
-        nextSpeak();
+      function copyText(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text);
+        }
+        return new Promise(function (resolve, reject) {
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            var ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (ok) resolve();
+            else reject(new Error('copy failed'));
+          } catch (e) {
+            reject(e);
+          }
+        });
       }
 
       // ===== イベント =====
-      startBtn.addEventListener('click', startTimer);
-      pauseBtn.addEventListener('click', pauseTimer);
-      resetBtn.addEventListener('click', resetTimer);
-      minusBtn.addEventListener('click', function () { changeTotal(-10); });
-      plusBtn.addEventListener('click', function () { changeTotal(10); });
-      shuffleBtn.addEventListener('click', shuffleItems);
-      prevBtn.addEventListener('click', goPrev);
-      nextBtn.addEventListener('click', goNext);
+      searchInput.addEventListener('input', render);
 
-      toggleComicBtn.addEventListener('click', toggleComic);
-      toggleTextBtn.addEventListener('click', toggleText);
-
-      recordStartBtn.addEventListener('click', function () {
-        startRecording();
+      showAllBtn.addEventListener('click', function () {
+        mode = 'all';
+        render();
       });
-      recordStopBtn.addEventListener('click', stopRecording);
 
-      speakCurrentBtn.addEventListener('click', speakCurrentSentence);
-      speakAllBtn.addEventListener('click', speakAllSentences);
-      stopSpeakBtn.addEventListener('click', stopSpeaking);
+      showTodoBtn.addEventListener('click', function () {
+        mode = 'todo';
+        render();
+      });
 
       // ===== 初期化 =====
-      renderTime();
-      renderSentence();
-      setStatus('準備OK');
-
-      if (!supportsRecording()) {
-        setRecordStatus('このブラウザでは録音機能が使えない可能性があります');
-      } else {
-        setRecordStatus('録音準備OK（⏺ 録音開始を押してください）');
-      }
-
-      if (hasTTS()) {
-        loadVoices();
-
-        if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
-          window.speechSynthesis.onvoiceschanged = loadVoices;
-        }
-
-        setTimeout(loadVoices, 500);
-      } else {
-        setTtsStatus('このブラウザでは読み上げが使えない可能性があります');
-      }
-
-      // 画像読み込み失敗時の補助表示
-      comicImage.addEventListener('error', function () {
-        comicImage.style.display = 'none';
-        comicHiddenPlaceholder.style.display = 'flex';
-        comicHiddenPlaceholder.innerHTML = '4コマ画像が見つかりません。<br>画像ファイル名（src）を確認してね。';
-        toggleComicBtn.textContent = '👀 4コマを表示';
-        isComicHidden = true;
-      });
+      render();
     })();
   </script>
 </body>
