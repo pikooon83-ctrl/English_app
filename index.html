@@ -98,4 +98,253 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>⏱
+      <h1>⏱ 1分スピーチ練習タイマー</h1>
+      <div class="sub">まずは動作優先のシンプル版（GitHub Pages向け）</div>
+
+      <div id="timeDisplay" class="time">01:00</div>
+      <div id="status" class="status">準備OK</div>
+
+      <div class="grid">
+        <button id="startBtn" class="primary">▶ 開始</button>
+        <button id="pauseBtn" class="muted">⏸ 一時停止</button>
+        <button id="resetBtn" class="danger">↺ リセット</button>
+        <button id="minusBtn" class="muted">−10秒</button>
+        <button id="plusBtn" class="muted">＋10秒</button>
+        <button id="shuffleBtn" class="muted">🔀 文をシャッフル</button>
+      </div>
+
+      <p class="small" style="margin-top:10px;">
+        使い方：開始 → 1分話す → 0秒で終了音（端末設定による）
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="small" id="indexLabel">文 1 / 8</div>
+      <div id="sentence" class="sentence"></div>
+      <div id="translation" class="translation"></div>
+
+      <div class="grid" style="margin-top:8px;">
+        <button id="prevBtn" class="muted">← 前の文</button>
+        <button id="nextBtn" class="muted">次の文 →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ===== 練習文（元の8文）=====
+      var items = [
+        {
+          en: "I have to listen to my kids' various demands every morning.",
+          ja: "私は毎朝、子どもたちのいろいろな要求を聞かないといけません。"
+        },
+        {
+          en: "My son gets angry immediately when I don't turn on the TV.",
+          ja: "息子は私がテレビをつけないと、すぐ怒ります。"
+        },
+        {
+          en: "I want to stay calm, but I sometimes lose patience.",
+          ja: "落ち着いていたいのですが、時々我慢できなくなります。"
+        },
+        {
+          en: "I am practicing speaking English little by little every day.",
+          ja: "私は毎日少しずつ英語を話す練習をしています。"
+        },
+        {
+          en: "I want to make a one-minute speech smoothly.",
+          ja: "私は1分間のスピーチをスムーズに話せるようになりたいです。"
+        },
+        {
+          en: "Even if I make mistakes, I want to keep speaking.",
+          ja: "間違えても、話し続けたいです。"
+        },
+        {
+          en: "I can improve if I practice step by step.",
+          ja: "少しずつ練習すれば、私は上達できます。"
+        },
+        {
+          en: "Today, I will do my best and finish in one minute.",
+          ja: "今日はベストを尽くして、1分で話し切ります。"
+        }
+      ];
+
+      // ===== 状態 =====
+      var currentIndex = 0;
+      var totalSeconds = 60;
+      var remainingSeconds = 60;
+      var timerId = null;
+      var isRunning = false;
+
+      // ===== 要素取得 =====
+      var timeDisplay = document.getElementById('timeDisplay');
+      var statusEl = document.getElementById('status');
+      var indexLabel = document.getElementById('indexLabel');
+      var sentenceEl = document.getElementById('sentence');
+      var translationEl = document.getElementById('translation');
+
+      var startBtn = document.getElementById('startBtn');
+      var pauseBtn = document.getElementById('pauseBtn');
+      var resetBtn = document.getElementById('resetBtn');
+      var minusBtn = document.getElementById('minusBtn');
+      var plusBtn = document.getElementById('plusBtn');
+      var shuffleBtn = document.getElementById('shuffleBtn');
+      var prevBtn = document.getElementById('prevBtn');
+      var nextBtn = document.getElementById('nextBtn');
+
+      // ===== 表示更新 =====
+      function formatTime(sec) {
+        var s = Math.max(0, sec);
+        var mm = Math.floor(s / 60);
+        var ss = s % 60;
+        return String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+      }
+
+      function renderTime() {
+        timeDisplay.textContent = formatTime(remainingSeconds);
+      }
+
+      function renderSentence() {
+        indexLabel.textContent = '文 ' + (currentIndex + 1) + ' / ' + items.length;
+        sentenceEl.textContent = items[currentIndex].en;
+        translationEl.textContent = items[currentIndex].ja;
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function stopTimer() {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        isRunning = false;
+      }
+
+      function beep() {
+        // 簡易ビープ（ブラウザ対応状況により鳴らない場合あり）
+        try {
+          var AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          var ctx = new AudioCtx();
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.value = 880;
+          gain.gain.value = 0.05;
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start();
+          setTimeout(function () {
+            osc.stop();
+            if (ctx.close) ctx.close();
+          }, 180);
+        } catch (e) {
+          // 音が出なくてもタイマー本体は動かす
+          console.log('beep failed', e);
+        }
+      }
+
+      function startTimer() {
+        if (isRunning) return;
+        if (remainingSeconds <= 0) {
+          remainingSeconds = totalSeconds;
+          renderTime();
+        }
+
+        isRunning = true;
+        setStatus('計測中… 話してみよう！');
+
+        timerId = setInterval(function () {
+          remainingSeconds -= 1;
+          renderTime();
+
+          if (remainingSeconds <= 0) {
+            remainingSeconds = 0;
+            renderTime();
+            stopTimer();
+            setStatus('時間です！よくできました ✨');
+            beep();
+          }
+        }, 1000);
+      }
+
+      function pauseTimer() {
+        if (!isRunning) {
+          setStatus('一時停止中');
+          return;
+        }
+        stopTimer();
+        setStatus('一時停止中');
+      }
+
+      function resetTimer() {
+        stopTimer();
+        remainingSeconds = totalSeconds;
+        renderTime();
+        setStatus('準備OK');
+      }
+
+      function changeTotal(delta) {
+        var next = totalSeconds + delta;
+        if (next < 10) next = 10;
+        if (next > 600) next = 600;
+
+        totalSeconds = next;
+
+        // 実行中でなければ残り秒数も合わせる
+        if (!isRunning) {
+          remainingSeconds = totalSeconds;
+          renderTime();
+          setStatus('時間設定を ' + totalSeconds + ' 秒に変更');
+        } else {
+          setStatus('実行中のため、次回リセット時に ' + totalSeconds + ' 秒');
+        }
+      }
+
+      function goPrev() {
+        currentIndex = (currentIndex - 1 + items.length) % items.length;
+        renderSentence();
+      }
+
+      function goNext() {
+        currentIndex = (currentIndex + 1) % items.length;
+        renderSentence();
+      }
+
+      function shuffleItems() {
+        // Fisher-Yates
+        for (var i = items.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = items[i];
+          items[i] = items[j];
+          items[j] = temp;
+        }
+        currentIndex = 0;
+        renderSentence();
+        setStatus('文をシャッフルしました');
+      }
+
+      // ===== イベント =====
+      startBtn.addEventListener('click', startTimer);
+      pauseBtn.addEventListener('click', pauseTimer);
+      resetBtn.addEventListener('click', resetTimer);
+      minusBtn.addEventListener('click', function () { changeTotal(-10); });
+      plusBtn.addEventListener('click', function () { changeTotal(10); });
+      shuffleBtn.addEventListener('click', shuffleItems);
+      prevBtn.addEventListener('click', goPrev);
+      nextBtn.addEventListener('click', goNext);
+
+      // ===== 初期化 =====
+      renderTime();
+      renderSentence();
+      setStatus('準備OK');
+    })();
+  </script>
+</body>
+</html>
